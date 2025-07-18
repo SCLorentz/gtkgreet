@@ -51,12 +51,10 @@ static void handle_response(struct response resp, int start_req)
             roundtrip(req);
 
             char* error = NULL;
-            if (resp.response_type == response_type_error &&
-                resp.body.response_error.error_type == error_type_auth) {
+            if (resp.response_type == response_type_error && resp.body.response_error.error_type == error_type_auth)
                 error = _("Login failed");
-            } else {
-                error = resp.body.response_error.description;
-            }
+            else error = resp.body.response_error.description;
+
             gtkgreet_setup_question(gtkgreet, QuestionTypeInitial, gtkgreet_get_initial_question(), error);
             break;
         }
@@ -66,7 +64,8 @@ static void handle_response(struct response resp, int start_req)
 void action_answer_question(GtkWidget *widget, gpointer data)
 {
     struct Window *ctx = data;
-    switch (gtkgreet->question_type) {
+    switch (gtkgreet->question_type)
+    {
         case QuestionTypeInitial: {
             if (gtkgreet->selected_command) {
                 free(gtkgreet->selected_command);
@@ -77,9 +76,8 @@ void action_answer_question(GtkWidget *widget, gpointer data)
             struct request req = {
                 .request_type = request_type_create_session,
             };
-            if (ctx->input_field != NULL) {
+            if (ctx->input_field != NULL)
                 strncpy(req.body.request_create_session.username, gtk_entry_get_text((GtkEntry*)ctx->input_field), 127);
-            }
             handle_response(roundtrip(req), 0);
             break;
         }
@@ -114,6 +112,5 @@ void action_cancel_question(GtkWidget *widget, gpointer data)
     struct response resp = roundtrip(req);
     if (resp.response_type != response_type_success)
         exit(1);
-
     gtkgreet_setup_question(gtkgreet, QuestionTypeInitial, gtkgreet_get_initial_question(), NULL);
 }

@@ -33,7 +33,7 @@ static void window_set_focus(struct Window *win, struct Window *old);
 
     static void window_setup_layershell(struct Window *ctx)
     {
-            gtk_widget_add_events(ctx->window, GDK_ENTER_NOTIFY_MASK);
+        gtk_widget_add_events(ctx->window, GDK_ENTER_NOTIFY_MASK);
         if (ctx->enter_notify_handler > 0) {
             g_signal_handler_disconnect(ctx->window, ctx->enter_notify_handler);
             ctx->enter_notify_handler = 0;
@@ -243,7 +243,8 @@ static void window_setup(struct Window *ctx)
             window_update_clock(ctx);
         }
         window_setup_question(ctx, gtkgreet->question_type, gtkgreet->question, gtkgreet->error);
-    } else if (ctx->body != NULL) {
+    }
+    else if (ctx->body != NULL) {
         gtk_widget_destroy(ctx->body);
         ctx->body = NULL;
         ctx->input_box = NULL;

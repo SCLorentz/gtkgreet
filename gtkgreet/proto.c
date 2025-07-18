@@ -236,11 +236,9 @@ struct response roundtrip(struct request req)
         resp.response_type = response_type_error;
 
         const char* errortypestr = json_get_string_from_object(json_resp, "error_type");
-        if (strcmp(errortypestr, "auth_error") == 0) {
-            resp.body.response_error.error_type = error_type_auth;
-        } else {
-            resp.body.response_error.error_type = error_type_error;
-        }
+
+        if (strcmp(errortypestr, "auth_error") == 0) resp.body.response_error.error_type = error_type_auth;
+        else resp.body.response_error.error_type = error_type_error;
 
         strncpy(resp.body.response_error.description, descriptionstr, sizeof(resp.body.response_error.description)-1);
         goto done;

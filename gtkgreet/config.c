@@ -16,16 +16,14 @@ int config_update_command_selector(GtkWidget *combobox)
 
     char buffer[255];
     FILE *fp = fopen("/etc/greetd/environments", "r");
-    if (fp == NULL)
-        return entries;
+    if (fp == NULL) return entries;
+
     while(fgets(buffer, 255, (FILE*) fp)) {
         size_t len = strnlen(buffer, 255);
-        if (len > 0 && len < 255 && buffer[len-1] == '\n') {
+        if (len > 0 && len < 255 && buffer[len-1] == '\n')
             buffer[len-1] = '\0';
-        }
-        if (gtkgreet->command != NULL && strcmp(gtkgreet->command, buffer) == 0) {
+        if (gtkgreet->command != NULL && strcmp(gtkgreet->command, buffer) == 0)
         	continue;
-        }
         gtk_combo_box_text_append((GtkComboBoxText*)combobox, NULL, buffer);
         entries++;
     }

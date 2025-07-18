@@ -54,9 +54,8 @@ static GOptionEntry entries[] =
                         break;
                     }
                 }
-            } else {
-                create_window(monitor);
             }
+            else create_window(monitor);
         }
 
         // Remove all windows left behind
@@ -85,9 +84,8 @@ static GOptionEntry entries[] =
             g_signal_connect(display, "monitor-added", G_CALLBACK(monitors_changed), NULL);
             g_signal_connect(display, "monitor-removed", G_CALLBACK(monitors_changed), NULL);
             return TRUE;
-        } else {
-            return FALSE;
         }
+        else return FALSE;
     }
 #else
     static gboolean setup_layer_shell() { return FALSE; }
@@ -114,7 +112,7 @@ static void attach_custom_style(const char* path)
         g_error_free(err);
     } else {
         gtk_style_context_add_provider_for_screen(gdk_screen_get_default(),
-                GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+            GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
     }
     g_object_unref(provider);
 }
