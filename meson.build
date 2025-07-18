@@ -1,6 +1,6 @@
 project(
 	'gtkgreet',
-	'c',
+	['c', 'cpp'],
 	version: '0.8',
 	license: 'GPL3',
 	meson_version: '>=0.47.0',
@@ -13,7 +13,7 @@ project(
 
 add_project_arguments('-Wno-unused-parameter', language: 'c')
 add_project_arguments('-Wno-missing-braces', language: 'c')
-add_project_arguments('-O', language: 'c')
+add_project_arguments('-O', language: ['c', 'cpp'])
 
 prefix = get_option('prefix')
 localedir = join_paths(prefix, get_option('localedir'))

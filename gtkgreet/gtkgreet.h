@@ -3,6 +3,9 @@
 
 #include <gtk/gtk.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 enum QuestionType {
 	QuestionTypeInitial = 0,
@@ -48,5 +51,9 @@ struct GtkGreet* create_gtkgreet();
 void gtkgreet_activate(struct GtkGreet *gtkgreet);
 void gtkgreet_destroy(struct GtkGreet *gtkgreet);
 char* gtkgreet_get_initial_question();
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

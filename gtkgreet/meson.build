@@ -9,7 +9,7 @@ endif
 executable(
 		'gtkgreet',
 		[
-			'main.c',
+			'main.cpp',
 			'proto.c',
 			'config.c',
 			'actions.c',

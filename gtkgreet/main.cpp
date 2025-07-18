@@ -93,7 +93,7 @@ static GOptionEntry entries[] =
     static gboolean setup_layer_shell() { return FALSE; }
 #endif
 
-static void activate(GtkApplication *app, gpointer user_data)
+static void activate([[maybe_unused]] GtkApplication *app, [[maybe_unused]] gpointer user_data)
 {
     gtkgreet_activate(gtkgreet);
     if (!setup_layer_shell()) {

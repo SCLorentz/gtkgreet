@@ -2,8 +2,12 @@
 #define _WINDOW_H
 
 #include <gtk/gtk.h>
+#include "gtkgreet.h"
 
-// Defined in gtkgreet.h
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 enum QuestionType;
 
 struct Window {
@@ -31,4 +35,8 @@ void window_setup_question(struct Window *ctx, enum QuestionType type, char* que
 void window_update_clock(struct Window *ctx);
 void window_swap_focus(struct Window *win, struct Window *old);
 
+#endif
+
+#ifdef __cplusplus
+}
 #endif
