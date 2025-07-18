@@ -12,12 +12,12 @@
 #include "gtkgreet.h"
 #include "window.h"
 
-static void handle_response(struct response resp, int start_req) {
+static void handle_response(struct response resp, int start_req)
+{
     switch (resp.response_type) {
         case response_type_success: {
-            if (start_req) {
+            if (start_req)
                 exit(0);
-            }
             struct request req = {
                 .request_type = request_type_start_session,
             };
@@ -63,7 +63,8 @@ static void handle_response(struct response resp, int start_req) {
     }
 }
 
-void action_answer_question(GtkWidget *widget, gpointer data) {
+void action_answer_question(GtkWidget *widget, gpointer data)
+{
     struct Window *ctx = data;
     switch (gtkgreet->question_type) {
         case QuestionTypeInitial: {
@@ -105,14 +106,14 @@ void action_answer_question(GtkWidget *widget, gpointer data) {
     }
 }
 
-void action_cancel_question(GtkWidget *widget, gpointer data) {
+void action_cancel_question(GtkWidget *widget, gpointer data)
+{
     struct request req = {
         .request_type = request_type_cancel_session,
     };
     struct response resp = roundtrip(req);
-    if (resp.response_type != response_type_success) {
+    if (resp.response_type != response_type_success)
         exit(1);
-    }
 
     gtkgreet_setup_question(gtkgreet, QuestionTypeInitial, gtkgreet_get_initial_question(), NULL);
 }

@@ -21,30 +21,28 @@ struct header {
     uint32_t payload_len;
 };
 
-static int write_req(int fd, struct json_object* req) {
+static int write_req(int fd, struct json_object* req)
+{
     const char* reqstr = json_object_get_string(req);
     size_t len = strlen(reqstr);
-    if (len > 0xFFFFFFFF) {
+    if (len > 0xFFFFFFFF)
 	    goto error;
-    }
     uint32_t header = len;
     char* headerp = (char*)&header;
     uint32_t off = 0;
 
     while (off < 4) {
         ssize_t n = write(fd, &headerp[off], 4-off);
-        if (n < 1) {
+        if (n < 1)
             goto error;
-        }
         off += n;
     }
 
     off = 0;
     while (off < len) {
         ssize_t n = write(fd, &reqstr[off], len-off);
-        if (n < 1) {
+        if (n < 1)
             goto error;
-        }
         off += n;
     }
  
@@ -53,7 +51,8 @@ error:
     return -1;
 }
 
-static struct json_object* read_resp(int fd) {
+static struct json_object* read_resp(int fd)
+{
     struct json_object* resp = NULL;
     char *respstr = NULL;
     uint32_t len;
@@ -62,9 +61,8 @@ static struct json_object* read_resp(int fd) {
     while (off < 4) {
         char* headerp = (char*)&len;
         ssize_t n = read(fd, &headerp[off], 4-off);
-        if (n < 1) {
-            goto end;
-        }
+        if (n < 1)
+            goto end; // * goto works similarly with jmp (just to remind myself)
         off += n;
     }
 
@@ -72,22 +70,21 @@ static struct json_object* read_resp(int fd) {
     respstr = (char*)calloc(1,len+1);
     while (off <len) {
         int n = read(fd, &respstr[off],len-off);
-        if (n < 1) {
+        if (n < 1)
             goto end;
-        }
         off += n;
     }
 
     resp = json_tokener_parse(respstr);
 
 end:
-    if (respstr != NULL) {
+    if (respstr != NULL)
         free(respstr);
-    }
     return resp;
 }
 
-static int connectto(const char* path) {
+static int connectto(const char* path)
+{
     int fd = socket(AF_UNIX, SOCK_STREAM, 0);
     if (fd < 0) {
         fprintf(stderr, "unable to open socket\n");
@@ -107,7 +104,8 @@ static int connectto(const char* path) {
     return fd;
 }
 
-static struct json_object* roundtrip_json(struct json_object* req) {
+static struct json_object* roundtrip_json(struct json_object* req)
+{
     struct json_object* resp = NULL;
     int fd;
     char* greetd_sock = getenv("GREETD_SOCK");
@@ -133,45 +131,44 @@ static struct json_object* roundtrip_json(struct json_object* req) {
     }
 
 end:
-    if (fd > 0) {
+    if (fd > 0)
         close(fd);
-    }
     return resp;
 }
 
-const char* json_get_string_from_object(struct json_object* obj, const char* key) {
-
+const char* json_get_string_from_object(struct json_object* obj, const char* key)
+{
     struct json_object* val = json_object_object_get(obj, key);
-    if (val == NULL) {
+    if (val == NULL)
         return NULL;
-    }
     return json_object_get_string(val);
 }
 
-struct response roundtrip(struct request req) {
+struct response roundtrip(struct request req)
+{
     struct json_object *json_req = json_object_new_object();
     switch (req.request_type) {
-    case request_type_create_session: {
-        json_object_object_add(json_req, "type", json_object_new_string("create_session"));
-        json_object_object_add(json_req, "username", json_object_new_string(req.body.request_create_session.username));
-        break;
-    }
-    case request_type_start_session: {
-        json_object_object_add(json_req, "type", json_object_new_string("start_session"));
-        struct json_object* cmd = json_object_new_array();
-        json_object_array_add(cmd, json_object_new_string(req.body.request_start_session.cmd));
-        json_object_object_add(json_req, "cmd", cmd);
-        break;
-    }
-    case request_type_post_auth_message_response: {
-        json_object_object_add(json_req, "type", json_object_new_string("post_auth_message_response"));
-        json_object_object_add(json_req, "response", json_object_new_string(req.body.request_post_auth_message_response.response));
-        break;
-    }
-    case request_type_cancel_session: {
-        json_object_object_add(json_req, "type", json_object_new_string("cancel_session"));
-        break;
-    }
+        case request_type_create_session: {
+            json_object_object_add(json_req, "type", json_object_new_string("create_session"));
+            json_object_object_add(json_req, "username", json_object_new_string(req.body.request_create_session.username));
+            break;
+        }
+        case request_type_start_session: {
+            json_object_object_add(json_req, "type", json_object_new_string("start_session"));
+            struct json_object* cmd = json_object_new_array();
+            json_object_array_add(cmd, json_object_new_string(req.body.request_start_session.cmd));
+            json_object_object_add(json_req, "cmd", cmd);
+            break;
+        }
+        case request_type_post_auth_message_response: {
+            json_object_object_add(json_req, "type", json_object_new_string("post_auth_message_response"));
+            json_object_object_add(json_req, "response", json_object_new_string(req.body.request_post_auth_message_response.response));
+            break;
+        }
+        case request_type_cancel_session: {
+            json_object_object_add(json_req, "type", json_object_new_string("cancel_session"));
+            break;
+        }
     }
 
     struct response resp = {

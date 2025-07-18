@@ -21,18 +21,18 @@ static gboolean use_layer_shell = FALSE;
 
 static GOptionEntry entries[] =
 {
-
-#ifdef LAYER_SHELL
-  { "layer-shell", 'l', 0, G_OPTION_ARG_NONE, &use_layer_shell, "Use layer shell", NULL},
-#endif
-  { "command", 'c', 0, G_OPTION_ARG_STRING, &command, "Command to run", "sway"},
-  { "background", 'b', 0, G_OPTION_ARG_STRING, &background, "Background image to use", NULL},
-  { "style", 's', 0, G_OPTION_ARG_FILENAME, &style, "CSS style to use", NULL },
-  { NULL }
+    #ifdef LAYER_SHELL
+        { "layer-shell", 'l', 0, G_OPTION_ARG_NONE, &use_layer_shell, "Use layer shell", NULL},
+    #endif
+        { "command", 'c', 0, G_OPTION_ARG_STRING, &command, "Command to run", "sway"},
+        { "background", 'b', 0, G_OPTION_ARG_STRING, &background, "Background image to use", NULL},
+        { "style", 's', 0, G_OPTION_ARG_FILENAME, &style, "CSS style to use", NULL },
+        { NULL, 0, 0, G_OPTION_ARG_NONE, NULL, NULL, NULL}
 };
 
 #ifdef LAYER_SHELL
-    static void reload_outputs() {
+    static void reload_outputs()
+    {
         GdkDisplay *display = gdk_display_get_default();
 
         // Make note of all existing windows
@@ -63,9 +63,8 @@ static GOptionEntry entries[] =
         for (guint idx = 0; idx < dead_windows->len; idx++) {
             struct Window *w = g_array_index(dead_windows, struct Window*, idx);
             gtk_widget_destroy(w->window);
-            if (gtkgreet->focused_window == w) {
+            if (gtkgreet->focused_window == w)
                 gtkgreet->focused_window = NULL;
-            }
         }
 
         for (guint idx = 0; idx < gtkgreet->windows->len; idx++) {
@@ -76,11 +75,10 @@ static GOptionEntry entries[] =
         g_array_unref(dead_windows);
     }
 
-    static void monitors_changed(GdkDisplay *display, GdkMonitor *monitor) {
-        reload_outputs();
-    }
+    static void monitors_changed(GdkDisplay *display, GdkMonitor *monitor) { reload_outputs(); }
 
-    static gboolean setup_layer_shell() {
+    static gboolean setup_layer_shell()
+    {
         if (gtkgreet->use_layer_shell) {
             reload_outputs();
             GdkDisplay *display = gdk_display_get_default();
@@ -92,12 +90,11 @@ static GOptionEntry entries[] =
         }
     }
 #else
-    static gboolean setup_layer_shell() {
-        return FALSE;
-    }
+    static gboolean setup_layer_shell() { return FALSE; }
 #endif
 
-static void activate(GtkApplication *app, gpointer user_data) {
+static void activate(GtkApplication *app, gpointer user_data)
+{
     gtkgreet_activate(gtkgreet);
     if (!setup_layer_shell()) {
         struct Window *win = create_window(NULL);
@@ -106,7 +103,8 @@ static void activate(GtkApplication *app, gpointer user_data) {
     }
 }
 
-static void attach_custom_style(const char* path) {
+static void attach_custom_style(const char* path)
+{
     GtkCssProvider *provider = gtk_css_provider_new();
     GError *err = NULL;
 
@@ -121,7 +119,8 @@ static void attach_custom_style(const char* path) {
     g_object_unref(provider);
 }
 
-int main (int argc, char **argv) {
+int main (int argc, char **argv)
+{
     setlocale(LC_ALL, "");
     bindtextdomain(GETTEXT_PACKAGE, LOCALEDIR);
     bind_textdomain_codeset(GETTEXT_PACKAGE, "UTF-8");
@@ -145,14 +144,12 @@ int main (int argc, char **argv) {
 
     if (background != NULL) {
         gtkgreet->background = gdk_pixbuf_new_from_file(background, &error);
-        if (gtkgreet->background == NULL) {
+        if (gtkgreet->background == NULL)
             g_print("background loading failed: %s\n", error->message);
-        }
     }
 
-    if (style != NULL) {
+    if (style != NULL)
         attach_custom_style(style);
-    }
 
     g_signal_connect(gtkgreet->app, "activate", G_CALLBACK(activate), NULL);
 

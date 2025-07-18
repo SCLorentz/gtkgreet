@@ -16,12 +16,12 @@
 static void window_set_focus(struct Window *win, struct Window *old);
 
 #ifdef LAYER_SHELL
-#   include <gtk-layer-shell.h>
+#include <gtk-layer-shell.h>
 
-    static void window_set_focus_layer_shell(struct Window *win, struct Window *old) {
-        if (old != NULL) {
+    static void window_set_focus_layer_shell(struct Window *win, struct Window *old)
+    {
+        if (old != NULL)
             gtk_layer_set_keyboard_interactivity(GTK_WINDOW(old->window), FALSE);
-        }
         gtk_layer_set_keyboard_interactivity(GTK_WINDOW(win->window), TRUE);
     }
 
@@ -31,7 +31,8 @@ static void window_set_focus(struct Window *win, struct Window *old);
         return FALSE;
     }
 
-    static void window_setup_layershell(struct Window *ctx) {
+    static void window_setup_layershell(struct Window *ctx)
+    {
             gtk_widget_add_events(ctx->window, GDK_ENTER_NOTIFY_MASK);
         if (ctx->enter_notify_handler > 0) {
             g_signal_handler_disconnect(ctx->window, ctx->enter_notify_handler);
@@ -51,37 +52,38 @@ static void window_set_focus(struct Window *win, struct Window *old);
 
 #endif
 
-void window_update_clock(struct Window *ctx) {
+void window_update_clock(struct Window *ctx)
+{
     char time[48];
     int size = 96000;
-    if (gtkgreet->focused_window == NULL || ctx == gtkgreet->focused_window) {
+    if (gtkgreet->focused_window == NULL || ctx == gtkgreet->focused_window)
         size = 32000;
-    }
     g_snprintf(time, 48, "<span size='%d'>%s</span>", size, gtkgreet->time);
     gtk_label_set_markup((GtkLabel*)ctx->clock_label, time);
 }
 
-void on_visibility_icon_press(GtkWidget *widget, gpointer data) {
+void on_visibility_icon_press(GtkWidget *widget, gpointer data)
+{
     gboolean visible = gtk_entry_get_visibility(GTK_ENTRY(widget));
 
     if (visible) {
         gtk_entry_set_visibility(GTK_ENTRY(widget), FALSE);
         gtk_entry_set_icon_from_icon_name(GTK_ENTRY(widget), GTK_ENTRY_ICON_SECONDARY, "view-reveal-symbolic");
-    } else {
+    }
+    else {
         gtk_entry_set_visibility(GTK_ENTRY(widget), TRUE);
         gtk_entry_set_icon_from_icon_name(GTK_ENTRY(widget), GTK_ENTRY_ICON_SECONDARY, "view-conceal-symbolic");
     }
 }
 
-void window_setup_question(struct Window *ctx, enum QuestionType type, char* question, char* error) {
-    if (gtkgreet->focused_window != NULL && ctx != gtkgreet->focused_window) {
+void window_setup_question(struct Window *ctx, enum QuestionType type, char* question, char* error)
+{
+    if (gtkgreet->focused_window != NULL && ctx != gtkgreet->focused_window)
         return;
-    }
 
     if (ctx->input_box != NULL) {
-        if (gtkgreet->question_cnt == ctx->question_cnt) {
+        if (gtkgreet->question_cnt == ctx->question_cnt)
             return;
-        }
 
         gtk_widget_destroy(ctx->input_box);
         ctx->input_box = NULL;
@@ -90,6 +92,7 @@ void window_setup_question(struct Window *ctx, enum QuestionType type, char* que
         ctx->input_field = NULL;
         ctx->command_selector = NULL;
     }
+
     ctx->input_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
     GtkWidget *question_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
     gtk_widget_set_halign(question_box, GTK_ALIGN_END);
@@ -182,12 +185,12 @@ void window_setup_question(struct Window *ctx, enum QuestionType type, char* que
 
     gtk_widget_show_all(ctx->window);
 
-    if (ctx->input_field != NULL) {
+    if (ctx->input_field != NULL)
         gtk_widget_grab_focus(ctx->input_field);
-    }
 }
 
-static void window_empty(struct Window *ctx) {
+static void window_empty(struct Window *ctx)
+{
     if (ctx->revealer != NULL) {
         gtk_widget_destroy(ctx->revealer);
         ctx->revealer = NULL;
@@ -201,7 +204,8 @@ static void window_empty(struct Window *ctx) {
     ctx->command_selector = NULL;
 }
 
-static void window_setup(struct Window *ctx) {
+static void window_setup(struct Window *ctx) 
+{
     // Create general structure if it is missing
     if (ctx->revealer == NULL) {
         ctx->revealer = gtk_revealer_new();
@@ -256,18 +260,21 @@ static void window_setup(struct Window *ctx) {
     ctx->question_cnt = gtkgreet->question_cnt;
 }
 
-static void window_destroy_notify(GtkWidget *widget, gpointer data) {
+static void window_destroy_notify(GtkWidget *widget, gpointer data)
+{
     window_empty(gtkgreet_window_by_widget(gtkgreet, widget));
     gtkgreet_remove_window_by_widget(gtkgreet, widget);
 }
 
-static void window_set_focus(struct Window *win, struct Window *old) {
+static void window_set_focus(struct Window *win, struct Window *old)
+{
     assert(win != NULL);
-
     window_setup(win);
 
-    if (old != NULL && old != win) {
-        if (old->input_field != NULL && win->input_field != NULL) {
+    if (old != NULL && old != win)
+    {
+        if (old->input_field != NULL && win->input_field != NULL)
+        {
             // Get previous cursor position
             gint cursor_pos = 0;
             g_object_get((GtkEntry*)old->input_field, "cursor-position", &cursor_pos, NULL);
@@ -280,43 +287,41 @@ static void window_set_focus(struct Window *win, struct Window *old) {
             g_signal_emit_by_name((GtkEntry*)win->input_field, "move-cursor", GTK_MOVEMENT_BUFFER_ENDS, -1, FALSE);
             g_signal_emit_by_name((GtkEntry*)win->input_field, "move-cursor", GTK_MOVEMENT_LOGICAL_POSITIONS, cursor_pos, FALSE);
         }
-        if (old->command_selector != NULL && win->command_selector != NULL) {
+        if (old->command_selector != NULL && win->command_selector != NULL)
             gtk_combo_box_set_active((GtkComboBox*)win->command_selector, gtk_combo_box_get_active((GtkComboBox*)old->command_selector));
-        }
         window_setup(old);
         gtk_widget_show_all(old->window);
     }
     gtk_widget_show_all(win->window);
 }
 
-void window_swap_focus(struct Window *win, struct Window *old) {
-#ifdef LAYER_SHELL
-    if (gtkgreet->use_layer_shell) {
-        window_set_focus_layer_shell(win, old);
-    }
-#endif
-    window_set_focus(win, old);
+void window_swap_focus(struct Window *win, struct Window *old)
+{
+    #ifdef LAYER_SHELL
+        if (gtkgreet->use_layer_shell) window_set_focus_layer_shell(win, old);
+    #endif
+        window_set_focus(win, old);
 }
 
-void window_configure(struct Window *w) {
-#ifdef LAYER_SHELL
-    if (gtkgreet->use_layer_shell) {
-        window_setup_layershell(w);
-    }
-#endif
-
-    window_setup(w);
-    gtk_widget_show_all(w->window);
+void window_configure(struct Window *w)
+{
+    #ifdef LAYER_SHELL
+        if (gtkgreet->use_layer_shell)
+            window_setup_layershell(w);
+    #endif
+        window_setup(w);
+        gtk_widget_show_all(w->window);
 }
 
-
-static gboolean window_background(GtkWidget *widget, cairo_t *cr, gpointer data) {
+static gboolean window_background(GtkWidget *widget, cairo_t *cr, gpointer data)
+{
     gdk_cairo_set_source_pixbuf(cr, gtkgreet->background, 0, 0);
     cairo_paint(cr);
     return FALSE;
 }
 
-struct Window *create_window(GdkMonitor *monitor) {
+struct Window *create_window(GdkMonitor *monitor)
+{
     struct Window *w = calloc(1, sizeof(struct Window));
     if (w == NULL) {
         fprintf(stderr, "failed to allocate Window instance\n");
