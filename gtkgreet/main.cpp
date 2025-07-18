@@ -19,15 +19,17 @@ static char* style = NULL;
 static gboolean use_layer_shell = FALSE;
 #endif
 
+using namespace std;
+
 static GOptionEntry entries[] =
 {
     #ifdef LAYER_SHELL
-        { "layer-shell", 'l', 0, G_OPTION_ARG_NONE, &use_layer_shell, "Use layer shell", NULL},
+    { "layer-shell", 'l', 0, G_OPTION_ARG_NONE, &use_layer_shell, "Use layer shell", NULL},
     #endif
-        { "command", 'c', 0, G_OPTION_ARG_STRING, &command, "Command to run", "sway"},
-        { "background", 'b', 0, G_OPTION_ARG_STRING, &background, "Background image to use", NULL},
-        { "style", 's', 0, G_OPTION_ARG_FILENAME, &style, "CSS style to use", NULL },
-        { NULL, 0, 0, G_OPTION_ARG_NONE, NULL, NULL, NULL}
+    { "command", 'c', 0, G_OPTION_ARG_STRING, &command, "Command to run", "sway"},
+    { "background", 'b', 0, G_OPTION_ARG_STRING, &background, "Background image to use", NULL},
+    { "style", 's', 0, G_OPTION_ARG_FILENAME, &style, "CSS style to use", NULL },
+    { NULL, 0, 0, G_OPTION_ARG_NONE, NULL, NULL, NULL}
 };
 
 #ifdef LAYER_SHELL
@@ -37,18 +39,21 @@ static GOptionEntry entries[] =
 
         // Make note of all existing windows
         GArray *dead_windows = g_array_new(FALSE, TRUE, sizeof(struct Window*));
-        for (guint idx = 0; idx < gtkgreet->windows->len; idx++) {
+        for (auto idx : gtkgreet->windows->len)
+        {
             struct Window *ctx = g_array_index(gtkgreet->windows, struct Window*, idx);
             g_array_append_val(dead_windows, ctx);
         }
 
         // Go through all monitors
-        for (int i = 0; i < gdk_display_get_n_monitors(display); i++) {
+        for (auto i : gdk_display_get_n_monitors(display))
+        {
             GdkMonitor *monitor = gdk_display_get_monitor(display, i);
             struct Window *w = gtkgreet_window_by_monitor(gtkgreet, monitor);
             if (w != NULL) {
                 // We already have this monitor, remove from dead_windows list
-                for (guint ydx = 0; ydx < dead_windows->len; ydx++) {
+                for (auto ydx : dead_windows->len)
+                {
                     if (w == g_array_index(dead_windows, struct Window*, ydx)) {
                         g_array_remove_index_fast(dead_windows, ydx);
                         break;
@@ -59,14 +64,16 @@ static GOptionEntry entries[] =
         }
 
         // Remove all windows left behind
-        for (guint idx = 0; idx < dead_windows->len; idx++) {
+        for (auto idx : dead_windows->len)
+        {
             struct Window *w = g_array_index(dead_windows, struct Window*, idx);
             gtk_widget_destroy(w->window);
             if (gtkgreet->focused_window == w)
                 gtkgreet->focused_window = NULL;
         }
 
-        for (guint idx = 0; idx < gtkgreet->windows->len; idx++) {
+        for (auto idx : gtkgreet->windows->len)
+        {
             struct Window *win = g_array_index(gtkgreet->windows, struct Window*, idx);
             window_configure(win);
         }
@@ -114,10 +121,11 @@ static void attach_custom_style(const char* path)
         gtk_style_context_add_provider_for_screen(gdk_screen_get_default(),
             GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
     }
+
     g_object_unref(provider);
 }
 
-int main (int argc, char **argv)
+int main(int argc, char **argv)
 {
     setlocale(LC_ALL, "");
     bindtextdomain(GETTEXT_PACKAGE, LOCALEDIR);
@@ -128,16 +136,18 @@ int main (int argc, char **argv)
     GOptionContext *option_context = g_option_context_new("- GTK-based greeter for greetd");
     g_option_context_add_main_entries(option_context, entries, NULL);
     g_option_context_add_group(option_context, gtk_get_option_group(TRUE));
-    if (!g_option_context_parse(option_context, &argc, &argv, &error)) {
+
+    if (!g_option_context_parse(option_context, &argc, &argv, &error))
+    {
         g_print("option parsing failed: %s\n", error->message);
         exit(1);
     }
 
     gtkgreet = create_gtkgreet();
 
-#ifdef LAYER_SHELL
+    #ifdef LAYER_SHELL
     gtkgreet->use_layer_shell = use_layer_shell;
-#endif
+    #endif
     gtkgreet->command = command;
 
     if (background != NULL) {
