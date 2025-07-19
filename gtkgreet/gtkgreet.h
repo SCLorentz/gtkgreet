@@ -15,10 +15,10 @@ enum QuestionType {
 	QuestionTypeError = 4,
 };
 
-// Defined in window.h
 struct Window;
 
-struct GtkGreet {
+struct GtkGreet
+{
     GtkApplication *app;
     GArray *windows;
     GdkPixbuf *background;

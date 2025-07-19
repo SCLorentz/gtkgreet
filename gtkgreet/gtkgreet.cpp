@@ -84,10 +84,8 @@ void gtkgreet_update_clocks(struct GtkGreet *gtkgreet)
 {
     time_t now = time(nullptr);
     struct tm *now_tm = localtime(&now);
-    if (now_tm == NULL)
-        return;
+    if (now_tm == NULL) return;
 
-    //string time_str = std::format("{:02}:{:02}", now_tm->tm_hour, now_tm->tm_min); (need C++ 20)
     snprintf(gtkgreet->time, 8, "%02d:%02d", now_tm->tm_hour, now_tm->tm_min);
 
     for (guint idx = 0; idx < gtkgreet->windows->len; idx++) {

@@ -1,4 +1,4 @@
-dependencies = [dependency('gtk+-3.0'), dependency('json-c')]
+dependencies = [dependency('gtk4'), dependency('json-c'), dependency('webkitgtk-6.0')]
 
 gtk_layer_shell = dependency('gtk-layer-shell-0', required: get_option('layershell'))
 if gtk_layer_shell.found()

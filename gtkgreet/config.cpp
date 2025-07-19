@@ -6,31 +6,29 @@
 #include <string>
 
 #include "gtkgreet.h"
-//#include "config.h"
 
 using namespace std;
 
-extern "C" int config_update_command_selector(GtkWidget *combobox)
+extern "C" int config_update_command_selector([[maybe_unused]] GtkWidget *combobox)
 {
     int entries = 0;
     if (gtkgreet->command != NULL) {
-        gtk_combo_box_text_append((GtkComboBoxText*)combobox, NULL, gtkgreet->command);
+        //gtk_combo_box_text_append((GtkComboBoxText*)combobox, NULL, gtkgreet->command);
     	entries++;
     }
 
     string line;
-    ifstream fp("/etc/greetd/environments");
+    ifstream fp("/etc/nixos/dotfiles/greetd/environments");
     if (!fp) return entries;
 
     while(getline(fp, line))
     {
-        //size_t len = line.length();
-        if (!line.empty() && line.back() == '\n')
-            line.pop_back();
+        if (!line.empty() && line.back() == '\n') line.pop_back();
+
         if (gtkgreet->command != NULL && string(gtkgreet->command) == line)
         	continue;
 
-        gtk_combo_box_text_append((GtkComboBoxText*)combobox, NULL, line.c_str());
+        //gtk_combo_box_text_append((GtkComboBoxText*)combobox, NULL, line.c_str());
         entries++;
     }
 

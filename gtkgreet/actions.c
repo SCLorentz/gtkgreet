@@ -4,8 +4,8 @@
 #include <assert.h>
 
 #include <glib/gi18n.h>
-
 #include <gtk/gtk.h>
+#include <gtk/gtkentry.h>
 
 #include "actions.h"
 #include "proto.h"
@@ -77,8 +77,11 @@ void action_answer_question(GtkWidget *widget, gpointer data)
             struct request req = {
                 .request_type = request_type_create_session,
             };
+            const char* input = gtk_editable_get_text(GTK_EDITABLE(ctx->input_field));
+
             if (ctx->input_field != NULL)
-                strncpy(req.body.request_create_session.username, gtk_entry_get_text((GtkEntry*)ctx->input_field), 127);
+                strncpy(req.body.request_create_session.username, input, 127);
+            
             handle_response(roundtrip(req), 0);
             break;
         }
@@ -88,7 +91,7 @@ void action_answer_question(GtkWidget *widget, gpointer data)
                 .request_type = request_type_post_auth_message_response,
             };
             if (ctx->input_field != NULL) {
-                strncpy(req.body.request_post_auth_message_response.response, gtk_entry_get_text((GtkEntry*)ctx->input_field), 127);
+                strncpy(req.body.request_post_auth_message_response.response, gtk_editable_get_text(GTK_EDITABLE(ctx->input_field)), 127);
             }
             handle_response(roundtrip(req), 0);
             break;
