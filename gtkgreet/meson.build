@@ -9,12 +9,12 @@ endif
 executable(
 		'gtkgreet',
 		[
-			'main.cpp',
-			'proto.c',
-			'config.cpp',
-			'actions.cpp',
-			'window.c',
-			'gtkgreet.cpp'
+			'src/main.cpp',
+			'src/proto.c',
+			'src/config.cpp',
+			'src/actions.cpp',
+			'src/window.c',
+			'src/gtkgreet.cpp'
 		],
 		dependencies: dependencies,
 		install: true)

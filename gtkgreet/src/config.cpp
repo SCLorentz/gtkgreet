@@ -9,11 +9,13 @@
 
 using namespace std;
 
-extern "C" int config_update_command_selector([[maybe_unused]] GtkWidget *combobox)
+//extern "C" int config_update_command_selector(GListStore *store)
+extern "C" int config_update_command_selector([[maybe_unused]] GListModel *model)
 {
     int entries = 0;
-    if (gtkgreet->command != NULL) {
-        //gtk_combo_box_text_append((GtkComboBoxText*)combobox, NULL, gtkgreet->command);
+    if (gtkgreet->command != NULL)
+    {
+        g_list_store_append(G_LIST_STORE(model), g_strdup(gtkgreet->command));
     	entries++;
     }
 
@@ -28,7 +30,7 @@ extern "C" int config_update_command_selector([[maybe_unused]] GtkWidget *combob
         if (gtkgreet->command != NULL && string(gtkgreet->command) == line)
         	continue;
 
-        //gtk_combo_box_text_append((GtkComboBoxText*)combobox, NULL, line.c_str());
+        g_list_store_append(G_LIST_STORE(model), g_strdup(line.c_str()));
         entries++;
     }
 

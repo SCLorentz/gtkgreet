@@ -143,23 +143,17 @@ void window_setup_question(struct Window *ctx, enum QuestionType type, char* que
 
     if (type == QuestionTypeInitial)
     {
-        GtkWidget *entry = gtk_entry_new();
-        gtk_widget_set_name(entry, "command-selector");
-        gtk_widget_set_size_request(entry, 384, -1);
-        config_update_command_selector(entry);
-        gtk_widget_set_halign(entry, GTK_ALIGN_END);
+        GListStore *store = g_list_store_new(G_TYPE_STRING);
+        config_update_command_selector(G_LIST_MODEL(store));
 
-        ctx->command_selector = entry;
+        GtkWidget *dropdown = gtk_drop_down_new(G_LIST_MODEL(store), NULL);
+        gtk_drop_down_set_selected(GTK_DROP_DOWN(dropdown), 0);
 
-        // todo
-        int index = gtk_combo_box_get_active(GTK_COMBO_BOX(ctx->command_selector));
-        gtk_combo_box_set_active(GTK_COMBO_BOX(ctx->command_selector), index);
+        ctx->command_selector = dropdown;
 
-        GtkWidget *selector_entry = gtk_button_get_child((GtkButton*)ctx->command_selector);
-        gtk_entry_set_placeholder_text((GtkEntry*)selector_entry, _("Command to run on login"));
-        g_signal_connect(selector_entry, "activate", G_CALLBACK(action_answer_question), ctx);
-
-        gtk_box_append(GTK_BOX(ctx->input_box), ctx->command_selector);
+        gtk_widget_set_tooltip_text(dropdown, _("Command to run on login"));
+        g_signal_connect(dropdown, "notify::selected", G_CALLBACK(action_answer_question), ctx);
+        gtk_box_append(GTK_BOX(ctx->input_box), dropdown);
     }
 
     gtk_box_append(GTK_BOX(ctx->body), ctx->input_box);
@@ -302,8 +296,8 @@ static void window_set_focus(struct Window *win, struct Window *old)
         }
         if (old->command_selector != NULL && win->command_selector != NULL)
         {
-            int index = gtk_combo_box_get_active(GTK_COMBO_BOX(old->command_selector));
-            gtk_combo_box_set_active(GTK_COMBO_BOX(win->command_selector), index);
+            int index = gtk_drop_down_get_selected(GTK_DROP_DOWN(old->command_selector));
+            gtk_drop_down_set_selected(GTK_DROP_DOWN(win->command_selector), index);
         }
         
         window_setup(old);

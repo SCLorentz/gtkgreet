@@ -1,6 +1,10 @@
 #ifndef _PROTO_H
 #define _PROTO_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 //
 // Request types
 //
@@ -82,4 +86,8 @@ struct response {
 
 struct response roundtrip(struct request req);
 
+#endif
+
+#ifdef __cplusplus
+}
 #endif

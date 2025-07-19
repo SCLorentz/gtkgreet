@@ -86,7 +86,8 @@ void action_answer_question([[maybe_unused]] GtkWidget *widget, gpointer data)
                 free(gtkgreet->selected_command);
                 gtkgreet->selected_command = NULL;
             }
-            gtkgreet->selected_command = strdup(gtk_combo_box_text_get_active_text((GtkComboBoxText*)ctx->command_selector));
+            const char *text = gtk_editable_get_text(GTK_EDITABLE(ctx->command_selector));
+            gtkgreet->selected_command = g_strdup(text);
 
             struct request req = {
                 request_type_create_session,
