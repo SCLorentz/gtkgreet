@@ -14,7 +14,8 @@
 
 static void handle_response(struct response resp, int start_req)
 {
-    switch (resp.response_type) {
+    switch (resp.response_type)
+    {
         case response_type_success: {
             if (start_req)
                 exit(0);

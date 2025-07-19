@@ -3,15 +3,14 @@
 #include <stdio.h>
 #include <gtk/gtk.h>
 #include <fstream>
+#include <string>
 
 #include "gtkgreet.h"
 //#include "config.h"
 
 using namespace std;
 
-extern "C" {
-
-int config_update_command_selector(GtkWidget *combobox)
+extern "C" int config_update_command_selector(GtkWidget *combobox)
 {
     int entries = 0;
     if (gtkgreet->command != NULL) {
@@ -19,24 +18,22 @@ int config_update_command_selector(GtkWidget *combobox)
     	entries++;
     }
 
-    char buffer[255];
+    string line;
     ifstream fp("/etc/greetd/environments");
     if (!fp) return entries;
 
-    while(fp.getline(buffer, 256))
+    while(getline(fp, line))
     {
-        size_t len = strlen(buffer);
-        if (len > 0 && len < 255 && buffer[len-1] == '\n')
-            buffer[len-1] = '\0';
-        if (gtkgreet->command != NULL && strcmp(gtkgreet->command, buffer) == 0)
+        //size_t len = line.length();
+        if (!line.empty() && line.back() == '\n')
+            line.pop_back();
+        if (gtkgreet->command != NULL && string(gtkgreet->command) == line)
         	continue;
 
-        gtk_combo_box_text_append((GtkComboBoxText*)combobox, NULL, buffer);
+        gtk_combo_box_text_append((GtkComboBoxText*)combobox, NULL, line.c_str());
         entries++;
     }
 
     fp.close();
     return entries;
-}
-
 }

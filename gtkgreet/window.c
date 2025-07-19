@@ -96,7 +96,8 @@ void window_setup_question(struct Window *ctx, enum QuestionType type, char* que
     ctx->input_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
     GtkWidget *question_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
     gtk_widget_set_halign(question_box, GTK_ALIGN_END);
-    switch (type) {
+    switch (type)
+    {
         case QuestionTypeInitial:
         case QuestionTypeVisible:
         case QuestionTypeSecret: {

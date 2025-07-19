@@ -23,7 +23,7 @@ struct Window* gtkgreet_window_by_widget(struct GtkGreet *gtkgreet, GtkWidget *w
 struct Window* gtkgreet_window_by_monitor(struct GtkGreet *gtkgreet, GdkMonitor *monitor)
 {
     for (guint idx = 0; idx < gtkgreet->windows->len; idx++) {
-                struct Window *ctx = g_array_index(gtkgreet->windows, struct Window*, idx);
+        struct Window *ctx = g_array_index(gtkgreet->windows, struct Window*, idx);
         if (ctx->monitor == monitor)
             return ctx;
     }
@@ -35,7 +35,8 @@ void gtkgreet_remove_window_by_widget(struct GtkGreet *gtkgreet, GtkWidget *widg
     for (guint idx = 0; idx < gtkgreet->windows->len; idx++)
     {
         struct Window *ctx = g_array_index(gtkgreet->windows, struct Window*, idx);
-        if (ctx->window == widget) {
+        if (ctx->window == widget)
+        {
             if (gtkgreet->focused_window)
                 gtkgreet->focused_window = NULL;
             free(ctx);
@@ -81,11 +82,14 @@ void gtkgreet_setup_question(struct GtkGreet *gtkgreet, enum QuestionType type, 
 
 void gtkgreet_update_clocks(struct GtkGreet *gtkgreet)
 {
-    time_t now = time(&now);
+    time_t now = time(nullptr);
     struct tm *now_tm = localtime(&now);
     if (now_tm == NULL)
         return;
+
+    //string time_str = std::format("{:02}:{:02}", now_tm->tm_hour, now_tm->tm_min); (need C++ 20)
     snprintf(gtkgreet->time, 8, "%02d:%02d", now_tm->tm_hour, now_tm->tm_min);
+
     for (guint idx = 0; idx < gtkgreet->windows->len; idx++) {
         struct Window *ctx = g_array_index(gtkgreet->windows, struct Window*, idx);
         window_update_clock(ctx);
