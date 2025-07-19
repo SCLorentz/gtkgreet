@@ -26,9 +26,9 @@ struct GtkGreet {
     struct Window *focused_window;
     guint draw_clock_source;
 
-#ifdef LAYER_SHELL
+    #ifdef LAYER_SHELL
     gboolean use_layer_shell;
-#endif
+    #endif
     char* command;
 
     char* selected_command;

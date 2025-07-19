@@ -1,15 +1,18 @@
 #define _POSIX_C_SOURCE 200809L
 
 #include <gtk/gtk.h>
-
 #include <glib/gi18n.h>
+#include <iterator>
 
 #include "window.h"
 #include "gtkgreet.h"
 
+extern "C" {
+
 struct Window* gtkgreet_window_by_widget(struct GtkGreet *gtkgreet, GtkWidget *window)
 {
-    for (guint idx = 0; idx < gtkgreet->windows->len; idx++) {
+    for (guint idx = 0; idx < gtkgreet->windows->len; idx++)
+    {
         struct Window *ctx = g_array_index(gtkgreet->windows, struct Window*, idx);
         if (ctx->window == window)
             return ctx;
@@ -20,7 +23,7 @@ struct Window* gtkgreet_window_by_widget(struct GtkGreet *gtkgreet, GtkWidget *w
 struct Window* gtkgreet_window_by_monitor(struct GtkGreet *gtkgreet, GdkMonitor *monitor)
 {
     for (guint idx = 0; idx < gtkgreet->windows->len; idx++) {
-        struct Window *ctx = g_array_index(gtkgreet->windows, struct Window*, idx);
+                struct Window *ctx = g_array_index(gtkgreet->windows, struct Window*, idx);
         if (ctx->monitor == monitor)
             return ctx;
     }
@@ -29,7 +32,8 @@ struct Window* gtkgreet_window_by_monitor(struct GtkGreet *gtkgreet, GdkMonitor 
 
 void gtkgreet_remove_window_by_widget(struct GtkGreet *gtkgreet, GtkWidget *widget)
 {
-    for (guint idx = 0; idx < gtkgreet->windows->len; idx++) {
+    for (guint idx = 0; idx < gtkgreet->windows->len; idx++)
+    {
         struct Window *ctx = g_array_index(gtkgreet->windows, struct Window*, idx);
         if (ctx->window == widget) {
             if (gtkgreet->focused_window)
@@ -45,6 +49,7 @@ void gtkgreet_focus_window(struct GtkGreet *gtkgreet, struct Window* win)
 {
     struct Window *old = gtkgreet->focused_window;
     gtkgreet->focused_window = win;
+
     window_swap_focus(win, old);
     for (guint idx = 0; idx < gtkgreet->windows->len; idx++) {
         struct Window *ctx = g_array_index(gtkgreet->windows, struct Window*, idx);
@@ -96,7 +101,8 @@ static int gtkgreet_update_clocks_handler(gpointer data)
 
 struct GtkGreet* create_gtkgreet()
 {
-    gtkgreet = calloc(1, sizeof(struct GtkGreet));
+    gtkgreet = new GtkGreet();
+
     gtkgreet->app = gtk_application_new("wtf.kl.gtkgreet", G_APPLICATION_DEFAULT_FLAGS);
     gtkgreet->windows = g_array_new(FALSE, TRUE, sizeof(struct Window*));
     gtkgreet->question_cnt = 1;
@@ -132,3 +138,5 @@ void gtkgreet_destroy(struct GtkGreet *gtkgreet)
 }
 
 char* gtkgreet_get_initial_question() { return _("Username:"); }
+
+}

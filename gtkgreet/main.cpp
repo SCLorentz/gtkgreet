@@ -50,7 +50,8 @@ static GOptionEntry entries[] =
         {
             GdkMonitor *monitor = gdk_display_get_monitor(display, i);
             struct Window *w = gtkgreet_window_by_monitor(gtkgreet, monitor);
-            if (w != NULL) {
+            if (w != NULL)
+            {
                 // We already have this monitor, remove from dead_windows list
                 for (auto ydx : dead_windows->len)
                 {
@@ -66,7 +67,8 @@ static GOptionEntry entries[] =
         // Remove all windows left behind
         for (auto idx : dead_windows->len)
         {
-            struct Window *w = g_array_index(dead_windows, struct Window*, idx);
+            vector<Window*> dead_windows;
+            Window* w = dead_windows[idx];  
             gtk_widget_destroy(w->window);
             if (gtkgreet->focused_window == w)
                 gtkgreet->focused_window = NULL;
@@ -74,7 +76,8 @@ static GOptionEntry entries[] =
 
         for (auto idx : gtkgreet->windows->len)
         {
-            struct Window *win = g_array_index(gtkgreet->windows, struct Window*, idx);
+            vector<Window*> gtkgreet->windows;
+            Window* win = gtkgreet->windows[idx];
             window_configure(win);
         }
 
@@ -85,7 +88,8 @@ static GOptionEntry entries[] =
 
     static gboolean setup_layer_shell()
     {
-        if (gtkgreet->use_layer_shell) {
+        if (gtkgreet->use_layer_shell)
+        {
             reload_outputs();
             GdkDisplay *display = gdk_display_get_default();
             g_signal_connect(display, "monitor-added", G_CALLBACK(monitors_changed), NULL);
@@ -101,7 +105,8 @@ static GOptionEntry entries[] =
 static void activate([[maybe_unused]] GtkApplication *app, [[maybe_unused]] gpointer user_data)
 {
     gtkgreet_activate(gtkgreet);
-    if (!setup_layer_shell()) {
+    if (!setup_layer_shell())
+    {
         struct Window *win = create_window(NULL);
         gtkgreet_focus_window(gtkgreet, win);
         window_configure(win);
@@ -160,7 +165,6 @@ int main(int argc, char **argv)
         attach_custom_style(style);
 
     g_signal_connect(gtkgreet->app, "activate", G_CALLBACK(activate), NULL);
-
     int status = g_application_run(G_APPLICATION(gtkgreet->app), argc, argv);
 
     gtkgreet_destroy(gtkgreet);

@@ -11,10 +11,10 @@ executable(
 		[
 			'main.cpp',
 			'proto.c',
-			'config.c',
+			'config.cpp',
 			'actions.c',
 			'window.c',
-			'gtkgreet.c'
+			'gtkgreet.cpp'
 		],
 		dependencies: dependencies,
 		install: true)
