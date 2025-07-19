@@ -1,6 +1,8 @@
-# gtkgreet
+# gtkgreet for my NixOS
 
 GTK based greeter for greetd, to be run under cage or similar.
+
+github mirror: https://github.com/kennylevinsen/gtkgreet/tree/master
 
 See the [wiki](https://man.sr.ht/~kennylevinsen/greetd) for FAQ, guides for common configurations, and troubleshooting information.
 
