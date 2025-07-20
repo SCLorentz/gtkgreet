@@ -64,6 +64,7 @@ void window_update_clock(struct Window *ctx)
     if (gtkgreet->focused_window == NULL || ctx == gtkgreet->focused_window)
         size = 32000;
     g_snprintf(time, 48, "<span size='%d'>%s</span>", size, gtkgreet->time);
+    g_assert(GTK_IS_LABEL(ctx->clock_label));
     gtk_label_set_markup((GtkLabel*)ctx->clock_label, time);
 }
 
@@ -83,28 +84,15 @@ void on_visibility_icon_press(GtkWidget *widget, gpointer data)
 
 void window_setup_question(struct Window *ctx, enum QuestionType type, char* question, char* error)
 {
-    GtkWidget *button_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
-    gtk_widget_set_halign(button_box, GTK_ALIGN_END);
-    gtk_box_append(GTK_BOX(ctx->input_box), button_box);
-
     if (gtkgreet->focused_window != NULL && ctx != gtkgreet->focused_window) return;
-
-    if (ctx->input_box != NULL)
-    {
-        if (gtkgreet->question_cnt == ctx->question_cnt)
-            return;
-
-        gtk_box_remove(GTK_BOX(button_box), ctx->input_box);
-        ctx->input_box = NULL;
-
-        // Children of the box
-        ctx->input_field = NULL;
-        ctx->command_selector = NULL;
-    }
 
     ctx->input_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
     GtkWidget *question_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
     gtk_widget_set_halign(question_box, GTK_ALIGN_END);
+
+    GtkWidget *button_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
+    gtk_widget_set_halign(button_box, GTK_ALIGN_END);
+    gtk_box_append(GTK_BOX(ctx->input_box), button_box);
 
     switch (type)
     {
@@ -143,7 +131,7 @@ void window_setup_question(struct Window *ctx, enum QuestionType type, char* que
 
     if (type == QuestionTypeInitial)
     {
-        GListStore *store = g_list_store_new(G_TYPE_STRING);
+        GListStore *store = g_list_store_new(GTK_TYPE_STRING_OBJECT);
         config_update_command_selector(G_LIST_MODEL(store));
 
         GtkWidget *dropdown = gtk_drop_down_new(G_LIST_MODEL(store), NULL);
@@ -162,6 +150,8 @@ void window_setup_question(struct Window *ctx, enum QuestionType type, char* que
         GtkWidget *label = gtk_label_new(error);
         char err[128];
         snprintf(err, 128, "<span color=\"red\">%s</span>", error);
+
+        g_assert(GTK_IS_LABEL(label));
         gtk_label_set_markup((GtkLabel*)label, err);
         gtk_widget_set_halign(label, GTK_ALIGN_END);
         gtk_box_append(GTK_BOX(button_box), label);
@@ -213,34 +203,22 @@ static void window_empty(struct Window *ctx)
 static void window_setup(struct Window *ctx) 
 {
     // Create general structure if it is missing
-    if (ctx->revealer == NULL) {
+    if (ctx->revealer == NULL)
+    {
         ctx->revealer = gtk_revealer_new();
-        g_object_set(ctx->revealer, "margin-bottom", 100, NULL);
-        g_object_set(ctx->revealer, "margin-top", 100, NULL);
-        g_object_set(ctx->revealer, "margin-left", 100, NULL);
-        g_object_set(ctx->revealer, "margin-right", 100, NULL);
+        // g_object_set(revealer, "margin-start", 20, "margin-end", 20, NULL); <-- using CSS instead
+        gtk_widget_add_css_class(ctx->revealer, "rv");
         gtk_widget_set_valign(ctx->revealer, GTK_ALIGN_CENTER);
-        gtk_box_append(GTK_BOX(ctx->window), ctx->revealer);
+        gtk_box_append(GTK_BOX(ctx->window_box), ctx->revealer);
         gtk_revealer_set_transition_type(GTK_REVEALER(ctx->revealer), GTK_REVEALER_TRANSITION_TYPE_NONE);
         gtk_revealer_set_reveal_child(GTK_REVEALER(ctx->revealer), FALSE);
         gtk_revealer_set_transition_duration(GTK_REVEALER(ctx->revealer), 750);
     }
 
-    if (ctx->window_box == NULL) {
-        ctx->window_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-        gtk_widget_set_name(ctx->window_box, "window");
-        gtk_box_append(GTK_BOX(ctx->revealer), ctx->window_box);
-
-        ctx->clock_label = gtk_label_new("");
-        gtk_widget_set_name(ctx->clock_label, "clock");
-        g_object_set(ctx->clock_label, "margin-bottom", 10, NULL);
-        gtk_box_append(GTK_BOX(ctx->window_box), ctx->clock_label);
-        window_update_clock(ctx);
-    }
-
     // Update input area if necessary
     if (gtkgreet->focused_window == ctx || gtkgreet->focused_window == NULL) {
-        if (ctx->body == NULL) {
+        if (ctx->body == NULL)
+        {
             ctx->body = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
             gtk_widget_set_halign(ctx->body, GTK_ALIGN_CENTER);
             gtk_widget_set_name(ctx->body, "body");
@@ -324,11 +302,11 @@ void window_configure(struct Window *w)
         gtk_widget_set_visible(w->window, TRUE);
 }
 
-static gboolean draw_bg(GtkWidget *widget, cairo_t *cr, gpointer data)
+static void draw_bg(GtkDrawingArea *area, cairo_t *cr, int width, int height, gpointer user_data)
 {
-    gdk_cairo_set_source_pixbuf(cr, gtkgreet->background, 0, 0);
-    cairo_paint(cr);
-    return FALSE;
+    cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
+    cairo_rectangle(cr, 0, 0, width, height);
+    cairo_fill(cr);
 }
 
 struct Window *create_window(GdkMonitor *monitor)
@@ -347,7 +325,26 @@ struct Window *create_window(GdkMonitor *monitor)
     gtk_window_set_title(GTK_WINDOW(w->window), "GTK-Greeter");
     gtk_window_set_default_size(GTK_WINDOW(w->window), 200, 200);
 
+    w->window_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    gtk_widget_set_hexpand(w->window_box, TRUE);
+    gtk_widget_set_vexpand(w->window_box, TRUE);
+    gtk_window_set_child(GTK_WINDOW(w->window), w->window_box);
+
+    w->clock_label = gtk_label_new(NULL);
+    gtk_widget_set_name(w->clock_label, "clock");
+    gtk_widget_set_halign(w->clock_label, GTK_ALIGN_CENTER);
+    gtk_widget_set_valign(w->clock_label, GTK_ALIGN_START);
+    gtk_box_append(GTK_BOX(w->window_box), w->clock_label);
+    window_update_clock(w);
+
     if (gtkgreet->background != NULL)
-        g_signal_connect(w->window, "snapshot", G_CALLBACK(draw_bg), NULL);
+    {
+        GtkWidget *bg = gtk_drawing_area_new();
+        gtk_widget_set_hexpand(bg, TRUE);
+        gtk_widget_set_vexpand(bg, TRUE);
+        gtk_drawing_area_set_draw_func(GTK_DRAWING_AREA(bg), draw_bg, NULL, NULL);
+
+        gtk_box_prepend(GTK_BOX(w->window_box), bg);
+    }
     return w;
 }

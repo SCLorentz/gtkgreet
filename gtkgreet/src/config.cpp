@@ -9,13 +9,12 @@
 
 using namespace std;
 
-//extern "C" int config_update_command_selector(GListStore *store)
 extern "C" int config_update_command_selector([[maybe_unused]] GListModel *model)
 {
     int entries = 0;
     if (gtkgreet->command != NULL)
     {
-        g_list_store_append(G_LIST_STORE(model), g_strdup(gtkgreet->command));
+        //g_list_store_append(G_LIST_STORE(model), g_strdup(gtkgreet->command));
     	entries++;
     }
 
@@ -30,7 +29,7 @@ extern "C" int config_update_command_selector([[maybe_unused]] GListModel *model
         if (gtkgreet->command != NULL && string(gtkgreet->command) == line)
         	continue;
 
-        g_list_store_append(G_LIST_STORE(model), g_strdup(line.c_str()));
+        //g_list_store_append(G_LIST_STORE(model), g_strdup(line.c_str()));
         entries++;
     }
 

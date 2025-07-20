@@ -18,12 +18,16 @@
           pkgs.ninja
           pkgs.bash
           pkgs.webkitgtk_6_0
+          pkgs.gdb
         ];
 
         packages = [
           (pkgs.writeShellScriptBin "run" ''
             ninja -C build
-            ./build/gtkgreet/gtkgreet -s ./assets/styles.css -b ./assets/wallpaper.jpg -c hyprland
+            G_DEBUG=fatal-criticals ./build/gtkgreet/gtkgreet -s ./assets/styles.css -b ./assets/wallpaper.jpg -c hyprland
+          '')
+          (pkgs.writeShellScriptBin "debug" ''
+            gdb --args ./build/gtkgreet/gtkgreet -s ./assets/styles.css -b ./assets/wallpaper.jpg -c hyprland
           '')
         ];
 

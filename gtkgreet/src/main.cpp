@@ -113,19 +113,12 @@ static void activate([[maybe_unused]] GtkApplication *app, [[maybe_unused]] gpoi
     }
 }
 
-static void attach_custom_style(const char* path)
+[[maybe_unused]] static void attach_custom_style(const char* path)
 {
     GtkCssProvider *provider = gtk_css_provider_new();
-    //GError *err = NULL;
 
     gtk_css_provider_load_from_path(provider, path);
-    /*if (err != NULL) {
-        g_warning("style loading failed: %s", err->message);
-        g_error_free(err);
-    } else {
-        gtk_style_context_add_provider_for_display(gtk_settings_get_default(),
-            GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
-    }*/
+
     GdkDisplay *display = gdk_display_get_default();
     gtk_style_context_add_provider_for_display(display, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
 
@@ -163,11 +156,11 @@ int main(int argc, char **argv)
             g_print("background loading failed: %s\n", error->message);
     }
 
-    if (style != NULL)
-        attach_custom_style(style);
-
     g_signal_connect(gtkgreet->app, "activate", G_CALLBACK(activate), NULL);
     int status = g_application_run(G_APPLICATION(gtkgreet->app), argc, argv);
+
+    //if (style != NULL)
+        //attach_custom_style(style);
 
     gtkgreet_destroy(gtkgreet);
 
