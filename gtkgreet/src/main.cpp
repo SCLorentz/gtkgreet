@@ -116,7 +116,7 @@ static void activate([[maybe_unused]] GtkApplication *app, [[maybe_unused]] gpoi
     {
         struct Window *win = create_window(NULL);
         gtkgreet_focus_window(gtkgreet, win);
-        window_configure(win);
+        //window_configure(win);
     }
 }
 

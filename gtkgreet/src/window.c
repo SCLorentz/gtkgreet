@@ -10,7 +10,7 @@
 #include <gtk/gtkeditable.h>
 #include <gtk/gtkcustomlayout.h>
 #include <gtk/gtksnapshot.h>
-//#include <webkitgtk-6.0/webkit/webkit.h>
+#include <webkitgtk-6.0/webkit/webkit.h>
 
 #include "proto.h"
 #include "window.h"
@@ -25,8 +25,7 @@ static void window_set_focus(struct Window *win, struct Window *old);
 
     static void window_set_focus_layer_shell(struct Window *win, struct Window *old)
     {
-        if (old != NULL)
-            gtk_layer_set_keyboard_interactivity(GTK_WINDOW(old->window), FALSE);
+        if (old != NULL) gtk_layer_set_keyboard_interactivity(GTK_WINDOW(old->window), FALSE);
         gtk_layer_set_keyboard_interactivity(GTK_WINDOW(win->window), TRUE);
     }
 
@@ -91,6 +90,8 @@ void window_setup_question(struct Window *ctx, enum QuestionType type, char* que
 {
     if (gtkgreet->focused_window != NULL && ctx != gtkgreet->focused_window) return;
 
+    // TODO organize this pls
+
     ctx->input_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
     GtkWidget *question_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
     gtk_widget_set_halign(question_box, GTK_ALIGN_END);
@@ -99,22 +100,43 @@ void window_setup_question(struct Window *ctx, enum QuestionType type, char* que
     gtk_widget_set_halign(button_box, GTK_ALIGN_END);
     gtk_box_append(GTK_BOX(ctx->input_box), button_box);
 
+    GtkWidget *label = gtk_label_new(question);
+    gtk_widget_set_halign(label, GTK_ALIGN_END);
+    gtk_box_append(GTK_BOX(question_box), label);
+
+    ctx->input_field = gtk_entry_new();
+    gtk_widget_set_name(ctx->input_field, "input-field");
+
+    GtkWidget *continue_button = gtk_button_new_with_label(_("Log in"));
+    g_signal_connect(continue_button, "clicked", G_CALLBACK(action_answer_question), ctx);
+    gtk_widget_add_css_class(continue_button, "suggested-action");
+    gtk_widget_set_halign(continue_button, GTK_ALIGN_END);
+
+    GListStore *store = g_list_store_new(GTK_TYPE_STRING_OBJECT);
+    config_update_command_selector(G_LIST_MODEL(store));
+
+    ctx->command_selector = gtk_drop_down_new(G_LIST_MODEL(store), NULL);
+    gtk_drop_down_set_selected(GTK_DROP_DOWN(ctx->command_selector), 0);
+
+    gtk_widget_set_tooltip_text(ctx->command_selector, _("Command to run on login"));
+    g_signal_connect(ctx->command_selector, "notify::selected", G_CALLBACK(action_answer_question), ctx);
+
+    gtk_box_append(GTK_BOX(button_box), continue_button);
+    gtk_box_append(GTK_BOX(ctx->input_box), question_box);
+    gtk_box_append(GTK_BOX(ctx->body), ctx->input_box);
+    gtk_box_append(GTK_BOX(ctx->input_box), ctx->command_selector);
+
     switch (type)
     {
         case QuestionTypeInitial:
         case QuestionTypeVisible:
         case QuestionTypeSecret: {
-            GtkWidget *label = gtk_label_new(question);
-            gtk_widget_set_halign(label, GTK_ALIGN_END);
-            gtk_box_append(GTK_BOX(question_box), label);
-
-            ctx->input_field = gtk_entry_new();
-            gtk_widget_set_name(ctx->input_field, "input-field");
-            if (type == QuestionTypeSecret) {
-                gtk_entry_set_input_purpose((GtkEntry*)ctx->input_field, GTK_INPUT_PURPOSE_PASSWORD);
-                gtk_entry_set_visibility((GtkEntry*)ctx->input_field, FALSE);
-                gtk_entry_set_icon_from_icon_name(GTK_ENTRY((GtkEntry*)ctx->input_field), GTK_ENTRY_ICON_SECONDARY, "view-reveal-symbolic");
-                gtk_entry_set_icon_activatable((GtkEntry*)ctx->input_field, GTK_ENTRY_ICON_SECONDARY, TRUE);
+            if (type == QuestionTypeSecret)
+            {
+                gtk_entry_set_input_purpose(GTK_ENTRY(ctx->input_field), GTK_INPUT_PURPOSE_PASSWORD);
+                gtk_entry_set_visibility(GTK_ENTRY(ctx->input_field), FALSE);
+                gtk_entry_set_icon_from_icon_name(GTK_ENTRY(GTK_ENTRY(ctx->input_field)), GTK_ENTRY_ICON_SECONDARY, "view-reveal-symbolic");
+                gtk_entry_set_icon_activatable(GTK_ENTRY(ctx->input_field), GTK_ENTRY_ICON_SECONDARY, TRUE);
                 g_signal_connect(ctx->input_field, "icon-press", G_CALLBACK(on_visibility_icon_press), NULL);
             }
             g_signal_connect(ctx->input_field, "activate", G_CALLBACK(action_answer_question), ctx);
@@ -131,25 +153,6 @@ void window_setup_question(struct Window *ctx, enum QuestionType type, char* que
             break;
         }
     }
-
-    gtk_box_append(GTK_BOX(ctx->input_box), question_box);
-
-    if (type == QuestionTypeInitial)
-    {
-        GListStore *store = g_list_store_new(GTK_TYPE_STRING_OBJECT);
-        config_update_command_selector(G_LIST_MODEL(store));
-
-        GtkWidget *dropdown = gtk_drop_down_new(G_LIST_MODEL(store), NULL);
-        gtk_drop_down_set_selected(GTK_DROP_DOWN(dropdown), 0);
-
-        ctx->command_selector = dropdown;
-
-        gtk_widget_set_tooltip_text(dropdown, _("Command to run on login"));
-        g_signal_connect(dropdown, "notify::selected", G_CALLBACK(action_answer_question), ctx);
-        gtk_box_append(GTK_BOX(ctx->input_box), dropdown);
-    }
-
-    gtk_box_append(GTK_BOX(ctx->body), ctx->input_box);
 
     if (error != NULL) {
         GtkWidget *label = gtk_label_new(error);
@@ -177,17 +180,9 @@ void window_setup_question(struct Window *ctx, enum QuestionType type, char* que
             break;
     }
 
-    GtkWidget *continue_button = gtk_button_new_with_label(_("Log in"));
-    g_signal_connect(continue_button, "clicked", G_CALLBACK(action_answer_question), ctx);
-    gtk_widget_add_css_class(continue_button, "suggested-action");
-
-    gtk_widget_set_halign(continue_button, GTK_ALIGN_END);
-    gtk_box_append(GTK_BOX(button_box), continue_button);
-
     gtk_widget_set_visible(ctx->window, TRUE);
 
-    if (ctx->input_field != NULL)
-        gtk_widget_grab_focus(ctx->input_field);
+    if (ctx->input_field != NULL) gtk_widget_grab_focus(ctx->input_field);
 }
 
 static void window_empty(struct Window *ctx)
@@ -259,7 +254,7 @@ static void window_destroy_notify(GtkWidget *widget, gpointer data)
 static void window_set_focus(struct Window *win, struct Window *old)
 {
     assert(win != NULL);
-    window_setup(win);
+    //window_setup(win);
 
     if (old != NULL && old != win)
     {
