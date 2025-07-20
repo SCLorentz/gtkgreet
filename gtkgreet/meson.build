@@ -12,7 +12,7 @@ executable(
 			'main.cpp',
 			'proto.c',
 			'config.cpp',
-			'actions.c',
+			'actions.cpp',
 			'window.c',
 			'gtkgreet.cpp'
 		],

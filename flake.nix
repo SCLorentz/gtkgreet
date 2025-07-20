@@ -11,18 +11,19 @@
       };
     in {
       devShells.${system}.default = pkgs.mkShell {
-        buildInputs = [
-          pkgs.gtk3
-          pkgs.pkg-config
-          pkgs.meson
-          pkgs.ninja
-          pkgs.bash
+        buildInputs = with pkgs; [
+          gtk3
+          pkg-config
+          meson
+          ninja
+          bash
+          gtk-layer-shell
         ];
 
         packages = [
           (pkgs.writeShellScriptBin "run" ''
             ninja -C build
-            ./build/gtkgreet/gtkgreet
+            GTK_LAYER_SHELL_DEBUG=1 ./build/gtkgreet/gtkgreet -s ./assets/styles.css -b ./assets/wallpaper.jpg -c hyprland
           '')
         ];
 

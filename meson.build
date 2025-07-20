@@ -5,15 +5,16 @@ project(
 	license: 'GPL3',
 	meson_version: '>=0.47.0',
 	default_options: [
-		'c_std=c11',
+		'c_std=c23',
 		'warning_level=2',
 		'werror=false',
 	],
 )
 
-add_project_arguments('-Wno-unused-parameter', language: 'c')
+add_project_arguments('-Wno-unused-parameter', language: ['c', 'cpp'])
 add_project_arguments('-Wno-missing-braces', language: 'c')
 add_project_arguments('-O', language: ['c', 'cpp'])
+#add_project_arguments('-Wall', language: ['c', 'cpp'])
 
 prefix = get_option('prefix')
 localedir = join_paths(prefix, get_option('localedir'))

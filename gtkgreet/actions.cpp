@@ -7,20 +7,21 @@
 
 #include <gtk/gtk.h>
 
-#include "actions.h"
+//#include "actions.h"
 #include "proto.h"
 #include "gtkgreet.h"
 #include "window.h"
 
+extern "C" {
 static void handle_response(struct response resp, int start_req)
 {
     switch (resp.response_type)
     {
         case response_type_success: {
-            if (start_req)
-                exit(0);
+            if (start_req) exit(0);
             struct request req = {
-                .request_type = request_type_start_session,
+                request_type_start_session,
+                {{ 0 }}
             };
             strncpy(req.body.request_start_session.cmd, gtkgreet->selected_command, 127);
             handle_response(roundtrip(req), 1);
@@ -29,7 +30,8 @@ static void handle_response(struct response resp, int start_req)
         case response_type_auth_message: {
             if (start_req) {
                 struct request req = {
-                    .request_type = request_type_cancel_session,
+                    request_type_cancel_session,
+                    {{ 0 }}
                 };
                 roundtrip(req);
 
@@ -47,7 +49,8 @@ static void handle_response(struct response resp, int start_req)
         case response_type_roundtrip_error:
         case response_type_error: {
             struct request req = {
-                .request_type = request_type_cancel_session,
+                request_type_cancel_session,
+                {{ 0 }}
             };
             roundtrip(req);
 
@@ -64,7 +67,8 @@ static void handle_response(struct response resp, int start_req)
 
 void action_answer_question(GtkWidget *widget, gpointer data)
 {
-    struct Window *ctx = data;
+    Window *ctx = static_cast<Window *>(data);
+
     switch (gtkgreet->question_type)
     {
         case QuestionTypeInitial: {
@@ -75,7 +79,8 @@ void action_answer_question(GtkWidget *widget, gpointer data)
             gtkgreet->selected_command = strdup(gtk_combo_box_text_get_active_text((GtkComboBoxText*)ctx->command_selector));
 
             struct request req = {
-                .request_type = request_type_create_session,
+                request_type_create_session,
+                {{ 0 }}
             };
             if (ctx->input_field != NULL)
                 strncpy(req.body.request_create_session.username, gtk_entry_get_text((GtkEntry*)ctx->input_field), 127);
@@ -85,7 +90,8 @@ void action_answer_question(GtkWidget *widget, gpointer data)
         case QuestionTypeSecret:
         case QuestionTypeVisible: {
             struct request req = {
-                .request_type = request_type_post_auth_message_response,
+                request_type_post_auth_message_response,
+                {{ 0 }}
             };
             if (ctx->input_field != NULL) {
                 strncpy(req.body.request_post_auth_message_response.response, gtk_entry_get_text((GtkEntry*)ctx->input_field), 127);
@@ -96,7 +102,8 @@ void action_answer_question(GtkWidget *widget, gpointer data)
         case QuestionTypeInfo:
         case QuestionTypeError: {
             struct request req = {
-                .request_type = request_type_post_auth_message_response,
+                request_type_post_auth_message_response,
+                {{ 0 }}
             };
             req.body.request_post_auth_message_response.response[0] = '\0';
             handle_response(roundtrip(req), 0);
@@ -108,10 +115,12 @@ void action_answer_question(GtkWidget *widget, gpointer data)
 void action_cancel_question(GtkWidget *widget, gpointer data)
 {
     struct request req = {
-        .request_type = request_type_cancel_session,
+        request_type_cancel_session,
+        {{ 0 }}
     };
     struct response resp = roundtrip(req);
-    if (resp.response_type != response_type_success)
-        exit(1);
+    if (resp.response_type != response_type_success) exit(1);
     gtkgreet_setup_question(gtkgreet, QuestionTypeInitial, gtkgreet_get_initial_question(), NULL);
+}
+
 }
