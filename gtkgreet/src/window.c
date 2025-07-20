@@ -262,11 +262,11 @@ static void window_set_focus(struct Window *win, struct Window *old)
         {
             // Get previous cursor position
             gint cursor_pos = 0;
-            g_object_get((GtkEntry*)old->input_field, "cursor-position", &cursor_pos, NULL);
+            g_object_get(GTK_ENTRY(old->input_field), "cursor-position", &cursor_pos, NULL);
 
             // Move content
-            gtk_editable_set_text(GTK_EDITABLE(win->input_field), gtk_editable_get_text(GTK_EDITABLE(old->input_field)));
-            gtk_editable_set_text(GTK_EDITABLE(old->input_field), "");
+            //gtk_editable_set_text(GTK_EDITABLE(win->input_field), gtk_editable_get_text(GTK_EDITABLE(old->input_field)));
+            //gtk_editable_set_text(GTK_EDITABLE(old->input_field), "");
 
             // Update new cursor position
             g_signal_emit_by_name(GTK_ENTRY(win->input_field), "move-cursor", GTK_MOVEMENT_BUFFER_ENDS, -1, FALSE);

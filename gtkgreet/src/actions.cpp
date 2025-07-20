@@ -26,8 +26,7 @@ static void handle_response(struct response resp, int start_req)
     switch (resp.response_type)
     {
         case response_type_success: {
-            if (start_req)
-                exit(0);
+            if (start_req) exit(0);
             struct request req = {
                 request_type_start_session,
                 { { 0 } }
@@ -64,10 +63,9 @@ static void handle_response(struct response resp, int start_req)
             };
             roundtrip(req);
 
-            string error = NULL;
-            if (resp.response_type == response_type_error && resp.body.response_error.error_type == error_type_auth)
-                error = "Login failed";
-            else error = resp.body.response_error.description;
+            string error = "Login failed";
+            if (resp.response_type != response_type_error && resp.body.response_error.error_type != error_type_auth)
+                error = resp.body.response_error.description;
 
             gtkgreet_setup_question(gtkgreet, QuestionTypeInitial, gtkgreet_get_initial_question(), _(error.c_str()));
             break;
@@ -86,8 +84,8 @@ void action_answer_question([[maybe_unused]] GtkWidget *widget, gpointer data)
                 free(gtkgreet->selected_command);
                 gtkgreet->selected_command = NULL;
             }
-            const char *text = gtk_editable_get_text(GTK_EDITABLE(ctx->command_selector));
-            gtkgreet->selected_command = g_strdup(text);
+            //const char *text = gtk_editable_get_text(GTK_EDITABLE(ctx->command_selector)); <-- GTK_DROPDOW not GTK_EDITABLE
+            //gtkgreet->selected_command = g_strdup(text);
 
             struct request req = {
                 request_type_create_session,
@@ -108,9 +106,8 @@ void action_answer_question([[maybe_unused]] GtkWidget *widget, gpointer data)
                 request_type_post_auth_message_response,
                 { { 0 } }
             };
-            if (ctx->input_field != NULL) {
+            if (ctx->input_field != NULL)
                 strncpy(req.body.request_post_auth_message_response.response, gtk_editable_get_text(GTK_EDITABLE(ctx->input_field)), 127);
-            }
             handle_response(roundtrip(req), 0);
             break;
         }
@@ -135,8 +132,7 @@ void action_cancel_question([[maybe_unused]] GtkWidget *widget, [[maybe_unused]]
     };
     struct response resp = roundtrip(req);
 
-    if (resp.response_type != response_type_success)
-        exit(1);
+    if (resp.response_type != response_type_success) exit(1);
     gtkgreet_setup_question(gtkgreet, QuestionTypeInitial, gtkgreet_get_initial_question(), NULL);
 }
 

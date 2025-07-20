@@ -24,7 +24,7 @@
         packages = [
           (pkgs.writeShellScriptBin "run" ''
             ninja -C build
-            G_DEBUG=fatal-criticals ./build/gtkgreet/gtkgreet -s ./assets/styles.css -b ./assets/wallpaper.jpg -c hyprland
+            GTK_LAYER_SHELL_DEBUG=1 G_DEBUG=fatal-criticals ./build/gtkgreet/gtkgreet -s ./assets/styles.css -b ./assets/wallpaper.jpg -c hyprland
           '')
           (pkgs.writeShellScriptBin "debug" ''
             gdb --args ./build/gtkgreet/gtkgreet -s ./assets/styles.css -b ./assets/wallpaper.jpg -c hyprland

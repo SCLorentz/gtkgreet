@@ -8,6 +8,7 @@
 
 #include <glib/gi18n.h>
 #include <locale.h>
+#include <string>
 
 struct GtkGreet *gtkgreet = NULL;
 
@@ -113,11 +114,12 @@ static void activate([[maybe_unused]] GtkApplication *app, [[maybe_unused]] gpoi
     }
 }
 
-[[maybe_unused]] static void attach_custom_style(const char* path)
+[[maybe_unused]] static void attach_custom_style(const string path)
 {
+    g_print("applying custom style %s", path.c_str());
     GtkCssProvider *provider = gtk_css_provider_new();
 
-    gtk_css_provider_load_from_path(provider, path);
+    gtk_css_provider_load_from_path(provider, path.c_str());
 
     GdkDisplay *display = gdk_display_get_default();
     gtk_style_context_add_provider_for_display(display, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
@@ -135,7 +137,6 @@ int main(int argc, char **argv)
     GError *error = NULL;
     GOptionContext *option_context = g_option_context_new("- GTK-based greeter for greetd");
     g_option_context_add_main_entries(option_context, entries, NULL);
-    //g_option_context_add_group(option_context, gtk_get_option_group(TRUE));
 
     if (!g_option_context_parse(option_context, &argc, &argv, &error))
     {
@@ -150,7 +151,8 @@ int main(int argc, char **argv)
     #endif
     gtkgreet->command = command;
 
-    if (background != NULL) {
+    if (background != NULL)
+    {
         gtkgreet->background = gdk_pixbuf_new_from_file(background, &error);
         if (gtkgreet->background == NULL)
             g_print("background loading failed: %s\n", error->message);
@@ -159,8 +161,11 @@ int main(int argc, char **argv)
     g_signal_connect(gtkgreet->app, "activate", G_CALLBACK(activate), NULL);
     int status = g_application_run(G_APPLICATION(gtkgreet->app), argc, argv);
 
-    //if (style != NULL)
-        //attach_custom_style(style);
+    if (style != NULL)
+    {
+        string path = style;
+        attach_custom_style(path);
+    }
 
     gtkgreet_destroy(gtkgreet);
 
