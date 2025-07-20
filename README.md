@@ -6,6 +6,10 @@ github mirror: https://github.com/kennylevinsen/gtkgreet/tree/master
 
 See the [wiki](https://man.sr.ht/~kennylevinsen/greetd) for FAQ, guides for common configurations, and troubleshooting information.
 
+Additions:
+---
+- C++
+- Gtk4
 
 ![screenshot](https://git.sr.ht/~kennylevinsen/gtkgreet/blob/master/assets/screenshot.png)
 
