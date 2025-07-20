@@ -38,12 +38,17 @@ static void window_set_focus(struct Window *win, struct Window *old);
 
     static void window_setup_layershell(struct Window *ctx)
     {
-        gtk_widget_add_events(ctx->window, GDK_ENTER_NOTIFY_MASK);
-        if (ctx->enter_notify_handler > 0) {
+        // ! gtk_widget_add_events(ctx->window, GDK_ENTER_NOTIFY);
+        /* todo:
+        GtkEventController* controller = gtk_event_controller_motion_new();
+        g_signal_connect(controller, "enter", G_CALLBACK(on_enter), ctx);
+        gtk_widget_add_controller(ctx->window, controller);*/
+
+        /*if (ctx->enter_notify_handler > 0) {
             g_signal_handler_disconnect(ctx->window, ctx->enter_notify_handler);
             ctx->enter_notify_handler = 0;
         }
-        ctx->enter_notify_handler = g_signal_connect(ctx->window, "enter-notify-event", G_CALLBACK(window_enter_notify), NULL);
+        ctx->enter_notify_handler = g_signal_connect(ctx->window, "enter-notify-event", G_CALLBACK(window_enter_notify), NULL);*/
 
         gtk_layer_init_for_window(GTK_WINDOW(ctx->window));
         gtk_layer_set_layer(GTK_WINDOW(ctx->window), GTK_LAYER_SHELL_LAYER_TOP);

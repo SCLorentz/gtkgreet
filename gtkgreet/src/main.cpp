@@ -9,6 +9,7 @@
 #include <glib/gi18n.h>
 #include <locale.h>
 #include <string>
+#include <vector>
 
 struct GtkGreet *gtkgreet = NULL;
 
@@ -40,21 +41,25 @@ static GOptionEntry entries[] =
 
         // Make note of all existing windows
         GArray *dead_windows = g_array_new(FALSE, TRUE, sizeof(struct Window*));
-        for (auto idx : gtkgreet->windows->len)
+        for (guint idx = 0; idx < gtkgreet->windows->len; idx++)
         {
             struct Window *ctx = g_array_index(gtkgreet->windows, struct Window*, idx);
             g_array_append_val(dead_windows, ctx);
         }
 
         // Go through all monitors
-        for (auto i : gdk_display_get_n_monitors(display))
+        GListModel *monitors = gdk_display_get_monitors(display);
+        guint n_monitors = g_list_model_get_n_items(monitors);
+
+        for (guint i = 0; i < n_monitors; i++)
         {
-            GdkMonitor *monitor = gdk_display_get_monitor(display, i);
+            GdkMonitor* monitor = static_cast<GdkMonitor*>(g_list_model_get_item(monitors, i));
             struct Window *w = gtkgreet_window_by_monitor(gtkgreet, monitor);
+
             if (w != NULL)
             {
                 // We already have this monitor, remove from dead_windows list
-                for (auto ydx : dead_windows->len)
+                for (guint ydx = 0; ydx < dead_windows->len; ydx++)
                 {
                     if (w == g_array_index(dead_windows, struct Window*, ydx)) {
                         g_array_remove_index_fast(dead_windows, ydx);
@@ -63,22 +68,23 @@ static GOptionEntry entries[] =
                 }
             }
             else create_window(monitor);
+
+            g_object_unref(monitor);
         }
 
         // Remove all windows left behind
-        for (auto idx : dead_windows->len)
+        for (guint idx = 0; idx < dead_windows->len; idx++)
         {
             vector<Window*> dead_windows;
-            Window* w = dead_windows[idx];  
-            gtk_widget_destroy(w->window);
+            Window* w = dead_windows[idx];
+            gtk_window_close(GTK_WINDOW(w->window));
             if (gtkgreet->focused_window == w)
                 gtkgreet->focused_window = NULL;
         }
 
-        for (auto idx : gtkgreet->windows->len)
+        for (guint idx = 0; idx < gtkgreet->windows->len; idx++)
         {
-            vector<Window*> gtkgreet->windows;
-            Window* win = gtkgreet->windows[idx];
+            struct Window *win = g_array_index(gtkgreet->windows, struct Window*, idx);
             window_configure(win);
         }
 

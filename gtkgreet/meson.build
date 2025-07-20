@@ -3,7 +3,7 @@ dependencies = [dependency('gtk4'), dependency('json-c'), dependency('webkitgtk-
 gtk_layer_shell = dependency('gtk-layer-shell-0', required: get_option('layershell'))
 if gtk_layer_shell.found()
 	dependencies += gtk_layer_shell
-	add_project_arguments('-DLAYER_SHELL', language : 'c')
+	add_project_arguments('-DLAYER_SHELL', language : ['c','cpp'])
 endif
 
 executable(

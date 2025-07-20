@@ -11,14 +11,18 @@
       };
     in {
       devShells.${system}.default = pkgs.mkShell {
-        buildInputs = [
-          pkgs.gtk4
-          pkgs.pkg-config
-          pkgs.meson
-          pkgs.ninja
-          pkgs.bash
-          pkgs.webkitgtk_6_0
-          pkgs.gdb
+        buildInputs = with pkgs; [
+          gtk4
+          pkg-config
+          meson
+          ninja
+          bash
+          webkitgtk_6_0
+          gdb
+          scdoc
+          cmake
+          gtk-layer-shell
+          json_c
         ];
 
         packages = [
