@@ -24,7 +24,6 @@ extern "C" int config_update_command_selector(GtkWidget *combobox)
 
     while(getline(fp, line))
     {
-        //size_t len = line.length();
         if (!line.empty() && line.back() == '\n')
             line.pop_back();
         if (gtkgreet->command != NULL && string(gtkgreet->command) == line)

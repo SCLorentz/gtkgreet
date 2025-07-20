@@ -2,6 +2,7 @@
 
 #include <time.h>
 #include <assert.h>
+#include <string>
 
 #include <glib/gi18n.h>
 
@@ -12,7 +13,10 @@
 #include "gtkgreet.h"
 #include "window.h"
 
+using namespace std;
+
 extern "C" {
+
 static void handle_response(struct response resp, int start_req)
 {
     switch (resp.response_type)
@@ -35,8 +39,8 @@ static void handle_response(struct response resp, int start_req)
                 };
                 roundtrip(req);
 
-                char *error = _("Unexpected auth question");
-                gtkgreet_setup_question(gtkgreet, QuestionTypeInitial, gtkgreet_get_initial_question(), error);
+                string error = "Unexpected auth question";
+                gtkgreet_setup_question(gtkgreet, QuestionTypeInitial, gtkgreet_get_initial_question(), _(error.c_str()));
                 break;
             }
 
@@ -54,12 +58,11 @@ static void handle_response(struct response resp, int start_req)
             };
             roundtrip(req);
 
-            char* error = NULL;
-            if (resp.response_type == response_type_error && resp.body.response_error.error_type == error_type_auth)
-                error = _("Login failed");
-            else error = resp.body.response_error.description;
+            string error = "Login failed";
+            if (resp.response_type != response_type_error && resp.body.response_error.error_type != error_type_auth)
+                error = resp.body.response_error.description;
 
-            gtkgreet_setup_question(gtkgreet, QuestionTypeInitial, gtkgreet_get_initial_question(), error);
+            gtkgreet_setup_question(gtkgreet, QuestionTypeInitial, gtkgreet_get_initial_question(), _(error.c_str()));
             break;
         }
     }
@@ -93,9 +96,8 @@ void action_answer_question(GtkWidget *widget, gpointer data)
                 request_type_post_auth_message_response,
                 {{ 0 }}
             };
-            if (ctx->input_field != NULL) {
+            if (ctx->input_field != NULL)
                 strncpy(req.body.request_post_auth_message_response.response, gtk_entry_get_text((GtkEntry*)ctx->input_field), 127);
-            }
             handle_response(roundtrip(req), 0);
             break;
         }

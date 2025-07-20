@@ -25,8 +25,8 @@ static int write_req(int fd, struct json_object* req)
 {
     const char* reqstr = json_object_get_string(req);
     size_t len = strlen(reqstr);
-    if (len > 0xFFFFFFFF)
-	    goto error;
+    if (len > 0xFFFFFFFF) goto error;
+
     uint32_t header = len;
     char* headerp = (char*)&header;
     uint32_t off = 0;
@@ -226,7 +226,8 @@ struct response roundtrip(struct request req)
         goto done;
     }
 
-    if (strcmp(typestr, "error") == 0) {
+    if (strcmp(typestr, "error") == 0)
+    {
         const char* descriptionstr = json_get_string_from_object(json_resp, "description");
         if (descriptionstr == NULL) {
             resp.response_type = response_type_error;

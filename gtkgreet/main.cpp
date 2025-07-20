@@ -55,10 +55,9 @@ static GOptionEntry entries[] =
                 // We already have this monitor, remove from dead_windows list
                 for (auto ydx : dead_windows->len)
                 {
-                    if (w == g_array_index(dead_windows, struct Window*, ydx)) {
-                        g_array_remove_index_fast(dead_windows, ydx);
-                        break;
-                    }
+                    if (w != g_array_index(dead_windows, struct Window*, ydx)) continue
+                    g_array_remove_index_fast(dead_windows, ydx);
+                    break;
                 }
             }
             else create_window(monitor);
@@ -88,15 +87,13 @@ static GOptionEntry entries[] =
 
     static gboolean setup_layer_shell()
     {
-        if (gtkgreet->use_layer_shell)
-        {
-            reload_outputs();
-            GdkDisplay *display = gdk_display_get_default();
-            g_signal_connect(display, "monitor-added", G_CALLBACK(monitors_changed), NULL);
-            g_signal_connect(display, "monitor-removed", G_CALLBACK(monitors_changed), NULL);
-            return TRUE;
-        }
-        else return FALSE;
+        if (!gtkgreet->use_layer_shell) return FALSE;
+
+        reload_outputs();
+        GdkDisplay *display = gdk_display_get_default();
+        g_signal_connect(display, "monitor-added", G_CALLBACK(monitors_changed), NULL);
+        g_signal_connect(display, "monitor-removed", G_CALLBACK(monitors_changed), NULL);
+        return TRUE;
     }
 #else
     static gboolean setup_layer_shell() { return FALSE; }
@@ -161,8 +158,7 @@ int main(int argc, char **argv)
             g_print("background loading failed: %s\n", error->message);
     }
 
-    if (style != NULL)
-        attach_custom_style(style);
+    if (style != NULL) attach_custom_style(style);
 
     g_signal_connect(gtkgreet->app, "activate", G_CALLBACK(activate), NULL);
     int status = g_application_run(G_APPLICATION(gtkgreet->app), argc, argv);
